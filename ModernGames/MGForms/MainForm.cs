@@ -20,7 +20,7 @@ namespace ModernGames
                 Visible = true,
                 Size = new Size(500, 500),
                 Location = new Point(0, 50),
-                BackColor = Color.Red,
+                BackColor = Color.Black,
             };
             tetris.Open();
         }

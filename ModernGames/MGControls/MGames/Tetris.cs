@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +26,15 @@ namespace ModernGames.MGControls.MGames
         /// <summary>
         /// 블럭의 종류
         /// </summary>
-        private const int BlockCount = 7;
+        private const int BLOCK_COUNT = 7;
+        /// <summary>
+        /// 한번에 오르는 점수
+        /// </summary>
+        private const int UP_SCORE = 10;
+        /// <summary>
+        /// 블록 사이즈
+        /// </summary>
+        private const int SIZE = 20;
         /// <summary>
         /// 블록이 처음 소환되는 위치 중 왼쪽 위
         /// </summary>
@@ -39,6 +48,18 @@ namespace ModernGames.MGControls.MGames
         /// 다음 블록들의 리스트, 7개를 각각 하나씩 채우며 진행, 모두 비었을 때 다시 채움
         /// </summary>
         private List<Block> NextList;
+        /// <summary>
+        /// 점수
+        /// </summary>
+        private int Score;
+        /// <summary>
+        /// 콤보
+        /// </summary>
+        private int Combo;
+        /// <summary>
+        /// 점수 레이블
+        /// </summary>
+        private Label ScoreLabel;
 
         /// <summary>
         /// 테트리스 게임 시작 생성자
@@ -46,6 +67,14 @@ namespace ModernGames.MGControls.MGames
         /// <param name="level"> 게임의 난이도(0~99) </param>
         public Tetris(int level) : base("Tetris", "The Modern Tetris", (100 - level) * 5)
         {
+            this.ScoreLabel = new Label()
+            {
+                Parent = this,
+                Visible = true,
+                Location = new Point(X_LENGTH * SIZE + SIZE, 0),
+                ForeColor = Color.White,
+                AutoSize = true,
+            };
             this.Disposed += TetrisDisposed;
             this.Space = new List<List<Block>>();
             for (int x = 0; x < X_LENGTH; x++)
@@ -71,9 +100,9 @@ namespace ModernGames.MGControls.MGames
                 return;
             }
 
-            List<Block> list = new List<Block>(new Block[BlockCount]);
+            List<Block> list = new List<Block>(new Block[BLOCK_COUNT]);
             
-            for (int i = 0; i < BlockCount; i++)
+            for (int i = 0; i < BLOCK_COUNT; i++)
             {
                 list[i] = Block.Floating | (Block)(4 * Math.Pow(2, i));
             }
@@ -180,6 +209,35 @@ namespace ModernGames.MGControls.MGames
                     }
                 }
             }
+
+            // 데스라인
+            for (int xx = 0; xx < X_LENGTH; xx++)
+            {
+                if ((this.Space[xx][DEATH_LINE] & Block.Building) != Block.Empty)
+                {
+                    Close();
+                }
+            }
+
+            // 라인완성
+            bool now_claer = false;
+            for (int yy = 0; yy < Y_LENGTH; yy++)
+            {
+                bool line_clear = true;
+                for (int xx = 0; xx < X_LENGTH; xx++)
+                {
+                    line_clear &= (this.Space[xx][yy] & Block.Building) != Block.Empty;
+                }
+                if (line_clear)
+                {
+                    LineRemove(yy);
+                    now_claer = true;
+                }
+                else if (!now_claer)
+                {
+                    this.Combo = 0;
+                }
+            }
         }
         /// <summary>
         /// 특정 좌표 주위 4칸 내의 모든 Floating 블록을 다운시키다가 Building 블록을 만나면 ChangeBuilding 호출
@@ -235,6 +293,8 @@ namespace ModernGames.MGControls.MGames
                 this.Space[i].RemoveAt(y);
                 this.Space[i].Insert(0, Block.Empty);
             }
+            this.Combo++;
+            this.Score += UP_SCORE * this.Combo;
         }
         /// <summary>
         /// 좌로 밀착
@@ -314,7 +374,7 @@ namespace ModernGames.MGControls.MGames
         private void GraphicDesign()
         {
             Graphics graphics = this.CreateGraphics();
-            graphics.Clear(Color.White);
+            this.ScoreLabel.Text = "Score: " + this.Score + " next, +" + (this.Combo * 10) + "!";
 
             for (int y = 0; y < Y_LENGTH; y++)
             {
@@ -322,38 +382,43 @@ namespace ModernGames.MGControls.MGames
                 {
                     if ((this.Space[x][y] & Block.LBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Aqua),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkRed), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.ReverseL) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Yellow),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkOrange), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Red),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkOliveGreen), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Green),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkGreen), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.IBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Blue),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkBlue), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.TBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Brown),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkViolet), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(Color.Black),
-                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.RosyBrown), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
+                    }
+                    else
+                    {
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.White), SIZE / 2),
+                            new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                 }
             }
@@ -383,7 +448,7 @@ namespace ModernGames.MGControls.MGames
                                             // a    
                                             // a a
 
-                                            if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                            if (x >= 1 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
                                                 && this.Space[x - 1][y + 1] == Block.Empty
                                                 && this.Space[x + 1][y] == Block.Empty
                                                 && this.Space[x + 1][y + 1] == Block.Empty)
@@ -404,10 +469,10 @@ namespace ModernGames.MGControls.MGames
                                                 // a a a
                                                 // a
 
-                                                if (x >= 0 && x < X_LENGTH - 2 && y >= 1 && y < Y_LENGTH - 2
-                                                && this.Space[x + 1][y - 1] == Block.Empty
-                                                && this.Space[x + 1][y + 1] == Block.Empty
-                                                && this.Space[x + 2][y + 1] == Block.Empty)
+                                                if (x >= 0 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 2
+                                                    && this.Space[x + 1][y - 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 2][y + 1] == Block.Empty)
                                                 {
                                                     this.Space[x + 1][y - 1] = Block.Floating | Block.LBlock;
                                                     this.Space[x + 1][y + 1] = Block.Floating | Block.LBlock;
@@ -423,10 +488,10 @@ namespace ModernGames.MGControls.MGames
                                                 //     a
                                                 // a a a
 
-                                                if (x >= 2 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 2
-                                                && this.Space[x - 2][y] == Block.Empty
-                                                && this.Space[x - 1][y] == Block.Empty
-                                                && this.Space[x - 1][y + 2] == Block.Empty)
+                                                if (x >= 1 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 2
+                                                    && this.Space[x - 2][y] == Block.Empty
+                                                    && this.Space[x - 1][y] == Block.Empty
+                                                    && this.Space[x - 1][y + 2] == Block.Empty)
                                                 {
                                                     this.Space[x - 2][y] = Block.Floating | Block.LBlock;
                                                     this.Space[x - 1][y] = Block.Floating | Block.LBlock;
@@ -446,9 +511,9 @@ namespace ModernGames.MGControls.MGames
                                         //   a
 
                                         if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 2
-                                                && this.Space[x][y + 1] == Block.Empty
-                                                && this.Space[x][y + 2] == Block.Empty
-                                                && this.Space[x + 2][y + 1] == Block.Empty)
+                                            && this.Space[x][y + 1] == Block.Empty
+                                            && this.Space[x][y + 2] == Block.Empty
+                                            && this.Space[x + 2][y + 1] == Block.Empty)
                                         {
                                             this.Space[x][y + 1] = Block.Floating | Block.LBlock;
                                             this.Space[x][y + 2] = Block.Floating | Block.LBlock;
@@ -464,22 +529,276 @@ namespace ModernGames.MGControls.MGames
                                 }
                                 else if ((this.Space[x][y] & Block.ReverseL) != Block.Empty)
                                 {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.ReverseL) != Block.Empty)
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.ReverseL) != Block.Empty)
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.ReverseL) != Block.Empty)
+                                            {
+                                                // a a
+                                                // a
+                                                // a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 1
+                                                    && this.Space[x - 1][y] == Block.Empty
+                                                    && this.Space[x - 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x + 1][y] = Block.Empty;
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //   a
+                                                //   a
+                                                // a a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                                    && this.Space[x - 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 2] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x + 1][y + 2] = Block.Floating | Block.ReverseL;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                    this.Space[x - 1][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // a
+                                            // a a a
+
+                                            if (x >= 0 && x < X_LENGTH + 1 && y >= 0 && y < Y_LENGTH
+                                                && this.Space[x + 1][y] == Block.Empty
+                                                && this.Space[x][y + 2] == Block.Empty
+                                                && this.Space[x + 1][y + 2] == Block.Empty)
+                                            {
+                                                this.Space[x + 1][y] = Block.Floating | Block.ReverseL;
+                                                this.Space[x][y + 2] = Block.Floating | Block.ReverseL;
+                                                this.Space[x + 1][y + 2] = Block.Floating | Block.ReverseL;
+
+                                                this.Space[x][y] = Block.Empty;
+                                                this.Space[x][y + 1] = Block.Empty;
+                                                this.Space[x + 2][y + 1] = Block.Empty;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a a
+                                        //     a
+
+                                        if (x >= 0 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                            && this.Space[x + 1][y - 1] == Block.Empty
+                                            && this.Space[x + 2][y - 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.ReverseL;
+                                            this.Space[x + 2][y - 1] = Block.Floating | Block.ReverseL;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 2][y] = Block.Empty;
+                                            this.Space[x + 2][y + 1] = Block.Empty;
+                                        }
+                                    }
+                                        
                                     return;
                                 }
                                 else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
                                 {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.ZBlock) != Block.Empty)
+                                    {
+                                        //   a
+                                        // a a
+                                        // a
+
+                                        if (x >= 2 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 1
+                                            && this.Space[x - 1][y] == Block.Empty
+                                            && this.Space[x - 2][y] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y] = Block.Floating | Block.ZBlock;
+                                            this.Space[x - 2][y] = Block.Floating | Block.ZBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x - 1][y + 2] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a
+                                        //   a a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 2
+                                            && this.Space[x + 2][y] == Block.Empty
+                                            && this.Space[x + 1][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 2][y] = Block.Floating | Block.ZBlock;
+                                            this.Space[x + 1][y + 2] = Block.Floating | Block.ZBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 1][y] = Block.Empty;
+                                        }
+                                    }
+
                                     return;
                                 }
                                 else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
                                 {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.ReverseZ) != Block.Empty)
+                                    {
+                                        //   a a
+                                        // a a
+
+                                        if (x >= 1 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 2
+                                            && this.Space[x - 1][y] == Block.Empty
+                                            && this.Space[x - 1][y - 1] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y] = Block.Floating | Block.ReverseZ;
+                                            this.Space[x - 1][y - 1] = Block.Floating | Block.ReverseZ;
+
+                                            this.Space[x + 1][y] = Block.Empty;
+                                            this.Space[x - 1][y + 1] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a
+                                        // a a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 1
+                                            && this.Space[x + 2][y + 1] == Block.Empty
+                                            && this.Space[x][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.ReverseZ;
+                                            this.Space[x][y + 2] = Block.Floating | Block.ReverseZ;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x][y + 1] = Block.Empty;
+                                        }
+                                    }
+
                                     return;
                                 }
                                 else if ((this.Space[x][y] & Block.IBlock) != Block.Empty)
                                 {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.IBlock) != Block.Empty)
+                                    {
+                                        // a a a a
+
+                                        if (x >= 0 && x < X_LENGTH && y >= 1 && y < Y_LENGTH - 2
+                                            && this.Space[x + 1][y - 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty
+                                            && this.Space[x + 1][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 2] = Block.Floating | Block.IBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 2][y] = Block.Empty;
+                                            this.Space[x + 3][y] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a
+                                        // a 
+                                        // a
+                                        // a
+
+                                        if (x >= 1 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH
+                                            && this.Space[x - 1][y + 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty
+                                            && this.Space[x + 2][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.IBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x][y + 2] = Block.Empty;
+                                            this.Space[x][y + 3] = Block.Empty;
+                                        }
+                                    }
+
                                     return;
                                 }
                                 else if ((this.Space[x][y] & Block.TBlock) != Block.Empty)
                                 {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.TBlock) != Block.Empty)
+                                    {
+                                        // a a a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                            && this.Space[x + 1][y - 1] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.TBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.TBlock) != Block.Empty)
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y + 1] & Block.TBlock) != Block.Empty)
+                                            {
+                                                // a
+                                                // a a
+                                                // a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                                    && this.Space[x - 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.TBlock;
+
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                            else 
+                                            {
+                                                //   a
+                                                // a a
+                                                //   a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 1
+                                                    && this.Space[x + 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.TBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //   a
+                                            // a a a
+
+                                            if (x >= 0 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x][y + 2] == Block.Empty)
+                                            {
+                                                this.Space[x][y + 2] = Block.Floating | Block.TBlock;
+
+                                                this.Space[x + 1][y + 1] = Block.Empty;
+                                            }
+                                        }
+                                    }
+
                                     return;
                                 }
                                 else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
@@ -494,6 +813,10 @@ namespace ModernGames.MGControls.MGames
                 {
                     Debug.WriteLine(ex);
                 }
+            }
+            else
+            {
+                // 우로굴러?
             }
         }
 
@@ -521,49 +844,28 @@ namespace ModernGames.MGControls.MGames
 
         protected override void Replace()
         {
-            // 데스라인
-            for (int x = 0; x < X_LENGTH; x++)
+            lock (this.locker)
             {
-                if ((this.Space[x][DEATH_LINE] & Block.Building) != Block.Empty)
-                {
-                    Close();
-                }
-            }
-
-            // 라인완성
-            for (int y = 0; y < Y_LENGTH; y++)
-            {
-                bool line_clear = true;
                 for (int x = 0; x < X_LENGTH; x++)
                 {
-                    line_clear &= (this.Space[x][y] & Block.Building) != Block.Empty;
-                }
-                if (line_clear)
-                {
-                    LineRemove(y);
-                    y--;
-                }
-            }
-
-            for (int x = 0; x < X_LENGTH; x++)
-            {
-                for (int y = Y_LENGTH - 1; y >= 0; y--)
-                {
-                    if ((this.Space[x][y] & Block.Floating) != Block.Empty)
+                    for (int y = Y_LENGTH - 1; y >= 0; y--)
                     {
-                        // 블록이 하나라도 공중에 있다면 전체 다운하고 탈출
-                        DownBlock(x, y);
-                        goto OUT;
+                        if ((this.Space[x][y] & Block.Floating) != Block.Empty)
+                        {
+                            // 블록이 하나라도 공중에 있다면 전체 다운하고 탈출
+                            DownBlock(x, y);
+                            goto OUT;
+                        }
                     }
                 }
-            }
-            // 여기까지 왔으면 공중 블록이 없음 => 생성
-            Block now = PopBlock();
-            CreateBlock(now ^ Block.Floating);
-        OUT:
+                // 여기까지 왔으면 공중 블록이 없음 => 생성
+                Block now = PopBlock();
+                CreateBlock(now ^ Block.Floating);
+            OUT:
 
-            // 테스터
-            GraphicDesign();
+                // 테스터
+                GraphicDesign();
+            }
         }
 
         protected override void Start()
@@ -573,6 +875,7 @@ namespace ModernGames.MGControls.MGames
             CreateBlock(now ^ Block.Floating);
         }
 
+        private object locker = new object();
         protected override void SystemKeyDown(Keys key)
         {
             switch (key)

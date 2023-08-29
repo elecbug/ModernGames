@@ -23,11 +23,14 @@ namespace ModernGames.MGControls.MGames
         private object locker;
         private bool roof;
 
-
         /// <summary>
         /// 게임 진행 타이머
         /// </summary>
         public Timer Timer { get; private set; }
+        /// <summary>
+        /// 키 인식 간격
+        /// </summary>
+        protected int KeyInterval { get; set; }
 
         /// <summary>
         /// 실시간 게임 생성자
@@ -37,6 +40,7 @@ namespace ModernGames.MGControls.MGames
         /// <param name="interval"> 프레임이자 게임의 진행 스피드 </param>
         public TimerBaseGamePanel(string name, string description, int interval)
         {
+            this.KeyInterval = 200;
             this.Name = name;
             this.Description = description;
             this.Timer = new Timer() 
@@ -62,7 +66,7 @@ namespace ModernGames.MGControls.MGames
                         if (Program.IsKeyDown(key))
                         {
                             SystemKeyDown(key);
-                            while (Program.IsKeyDown(key)) ;
+                            Task.Delay(this.KeyInterval).Wait();
                         }
                     }
                 }
