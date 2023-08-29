@@ -1,4 +1,5 @@
 using ModernGames.MGControls;
+using ModernGames.MGControls.MGames;
 
 namespace ModernGames
 {
@@ -13,6 +14,15 @@ namespace ModernGames
                 Parent = this,
                 Size = new Size(50, 50),
             };
+            Tetris tetris = new Tetris(1) 
+            {
+                Parent = this,
+                Visible = true,
+                Size = new Size(500, 500),
+                Location = new Point(0, 50),
+                BackColor = Color.Red,
+            };
+            tetris.Open();
         }
     }
 }
