@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="MyGames\" />
     <Folder Include="Properties\Resources\" />
   </ItemGroup>
 

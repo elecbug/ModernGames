@@ -1,4 +1,4 @@
-using ModernGames.MyControls;
+using ModernGames.MGControls;
 
 namespace ModernGames
 {
