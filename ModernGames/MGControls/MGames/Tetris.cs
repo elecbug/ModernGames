@@ -886,8 +886,6 @@ namespace ModernGames.MGControls.MGames
                 case Keys.A: Spin(true); break;
                 case Keys.S: Spin(false); break;
             }
-            GraphicDesign();
         }
-
     }
 }
