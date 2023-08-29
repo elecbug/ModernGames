@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModernGames.MyForm;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,17 @@ namespace ModernGames.MGControls.MGames
         public new string Name { get; protected set; }
         public string Description { get; protected set; }
 
+        /// <summary>
+        /// 키 인풋을 체크하는 스레드
+        /// </summary>
+        protected Thread KeyChecker { get; private set; }
+        private object locker;
+        private bool roof;
+
+
+        /// <summary>
+        /// 게임 진행 타이머
+        /// </summary>
         public Timer Timer { get; private set; }
 
         /// <summary>
@@ -31,6 +43,30 @@ namespace ModernGames.MGControls.MGames
             {
                 Interval = interval,
             };
+            this.locker = new object();
+            this.KeyChecker = new Thread(() =>
+            {
+                this.roof = true;
+
+                while (true)
+                {
+                    lock (this.locker)
+                    {
+                        if (!this.roof) 
+                        {
+                            break;
+                        }
+                    }
+                    foreach (Keys key in Program.KeySet)
+                    {
+                        if (Program.IsKeyDown(key))
+                        {
+                            SystemKeyDown(key);
+                            while (Program.IsKeyDown(key)) ;
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -39,6 +75,7 @@ namespace ModernGames.MGControls.MGames
         public void Open()
         {
             Start();
+            this.KeyChecker.Start();
 
             this.Timer.Tick += (s, e) =>
             {
@@ -53,6 +90,11 @@ namespace ModernGames.MGControls.MGames
         public void Close()
         {
             this.Timer.Stop();
+
+            lock (this.locker)
+            {
+                this.roof = false;
+            }
             End();
         }
 
@@ -80,5 +122,10 @@ namespace ModernGames.MGControls.MGames
         /// 게임을 끝낼 때 한번 호출되는 메서드
         /// </summary>
         protected abstract void End();
+        /// <summary>
+        /// 미리 예약된 몇몇 키 누름 시 호출 
+        /// </summary>
+        /// <param name="key"></param>
+        protected abstract void SystemKeyDown(Keys key);
     }
 }

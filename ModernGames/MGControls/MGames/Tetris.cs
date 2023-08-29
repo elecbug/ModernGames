@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,31 +46,19 @@ namespace ModernGames.MGControls.MGames
         /// <param name="level"> 게임의 난이도(0~99) </param>
         public Tetris(int level) : base("Tetris", "The Modern Tetris", (100 - level) * 5)
         {
+            this.Disposed += TetrisDisposed;
             this.Space = new List<List<Block>>();
             for (int x = 0; x < X_LENGTH; x++)
             {
                 this.Space.Add(new List<Block>(new Block[Y_LENGTH]));
             }
             this.NextList = new List<Block>();
+        }
 
-            this.test = new RichTextBox()
-            {
-                Parent = this,
-                Visible = true,
-                AutoSize = true,
-                ReadOnly = true,
-                Dock = DockStyle.Fill,
-                Font = new Font("a", 5, FontStyle.Bold),
-            };
-            this.test.KeyDown += (s, e) =>
-            {
-                switch (e.KeyCode)
-                {
-                    case Keys.A: LeftMove(); break;
-                    case Keys.D: RightMove(); break;
-                }
-            };
-        } 
+        private void TetrisDisposed(object? sender, EventArgs e)
+        {
+            base.Close();
+        }
 
         /// <summary>
         /// NextList의 원소가 없는 경우 하나씩 채움
@@ -244,14 +233,7 @@ namespace ModernGames.MGControls.MGames
             for (int i = 0; i < X_LENGTH; i++)
             {
                 this.Space[i].RemoveAt(y);
-            }
-            for (int yy = y - 1; yy > 0; yy--)
-            {
-                for (int xx = 0; xx < X_LENGTH; xx++)
-                {
-                    this.Space[xx][yy + 1] = this.Space[xx][yy];
-                    this.Space[xx][yy] = Block.Empty;
-                }
+                this.Space[i].Insert(0, Block.Empty);
             }
         }
         /// <summary>
@@ -259,12 +241,260 @@ namespace ModernGames.MGControls.MGames
         /// </summary>
         private void LeftMove()
         {
+            int count = 0;
+
+            for (int y = 0; y < Y_LENGTH; y++)
+            {
+                for (int x = 1; x < X_LENGTH; x++)
+                {
+                    if ((this.Space[x - 1][y] == Block.Empty 
+                        || (this.Space[x - 1][y] & Block.Floating) == Block.Floating)
+                        && (this.Space[x][y] & Block.Floating) != Block.Empty)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            if (count == 4)
+            {
+                for (int y = 0; y < Y_LENGTH; y++)
+                {
+                    for (int x = 1; x < X_LENGTH; x++)
+                    {
+                        if (this.Space[x - 1][y] == Block.Empty
+                            && (this.Space[x][y] & Block.Floating) != Block.Empty)
+                        {
+                            this.Space[x - 1][y] = this.Space[x][y];
+                            this.Space[x][y] = Block.Empty;
+                        }
+                    }
+                }
+            }
         }
         /// <summary>
         /// 우로 밀착
         /// </summary>
         private void RightMove()
         {
+            int count = 0;
+
+            for (int y = 0; y < Y_LENGTH; y++)
+            {
+                for (int x = X_LENGTH - 2; x >= 0; x--)
+                {
+                    if ((this.Space[x + 1][y] == Block.Empty
+                        || (this.Space[x + 1][y] & Block.Floating) == Block.Floating)
+                        && (this.Space[x][y] & Block.Floating) != Block.Empty)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            if (count == 4)
+            {
+                for (int y = 0; y < Y_LENGTH; y++)
+                {
+                    for (int x = X_LENGTH - 2; x >= 0; x--)
+                    {
+                        if (this.Space[x + 1][y] == Block.Empty
+                            && (this.Space[x][y] & Block.Floating) != Block.Empty)
+                        {
+                            this.Space[x + 1][y] = this.Space[x][y];
+                            this.Space[x][y] = Block.Empty;
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 화면 갱신 메서드
+        /// </summary>
+        private void GraphicDesign()
+        {
+            Graphics graphics = this.CreateGraphics();
+            graphics.Clear(Color.White);
+
+            for (int y = 0; y < Y_LENGTH; y++)
+            {
+                for (int x = 0; x < X_LENGTH; x++)
+                {
+                    if ((this.Space[x][y] & Block.LBlock) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Aqua),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.ReverseL) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Yellow),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Red),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Green),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.IBlock) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Blue),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.TBlock) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Brown),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                    else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
+                    {
+                        graphics.DrawRectangle(new Pen(Color.Black),
+                            new Rectangle(new Point(x * 10, y * 10), new Size(10, 10)));
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 좌로 굴러
+        /// </summary>
+        private void Spin(bool is_left)
+        {
+            if (is_left)
+            {
+                try
+                {
+                    for (int y = 0; y < Y_LENGTH; y++)
+                    {
+                        for (int x = 0; x < X_LENGTH; x++)
+                        {
+                            if ((this.Space[x][y] & Block.Floating) != Block.Empty)
+                            {
+                                if ((this.Space[x][y] & Block.LBlock) != Block.Empty)
+                                {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.LBlock) != Block.Empty)
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.LBlock) != Block.Empty)
+                                        {
+                                            // a
+                                            // a    
+                                            // a a
+
+                                            if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x - 1][y + 1] == Block.Empty
+                                                && this.Space[x + 1][y] == Block.Empty
+                                                && this.Space[x + 1][y + 1] == Block.Empty)
+                                            {
+                                                this.Space[x - 1][y + 1] = Block.Floating | Block.LBlock;
+                                                this.Space[x + 1][y] = Block.Floating | Block.LBlock;
+                                                this.Space[x + 1][y + 1] = Block.Floating | Block.LBlock;
+
+                                                this.Space[x][y] = Block.Empty;
+                                                this.Space[x][y + 2] = Block.Empty;
+                                                this.Space[x + 1][y + 2] = Block.Empty;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.LBlock) != Block.Empty)
+                                            {
+                                                // a a a
+                                                // a
+
+                                                if (x >= 0 && x < X_LENGTH - 2 && y >= 1 && y < Y_LENGTH - 2
+                                                && this.Space[x + 1][y - 1] == Block.Empty
+                                                && this.Space[x + 1][y + 1] == Block.Empty
+                                                && this.Space[x + 2][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x + 1][y - 1] = Block.Floating | Block.LBlock;
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.LBlock;
+                                                    this.Space[x + 2][y + 1] = Block.Floating | Block.LBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 1] = Block.Empty;
+                                                    this.Space[x + 2][y] = Block.Empty;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //     a
+                                                // a a a
+
+                                                if (x >= 2 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x - 2][y] == Block.Empty
+                                                && this.Space[x - 1][y] == Block.Empty
+                                                && this.Space[x - 1][y + 2] == Block.Empty)
+                                                {
+                                                    this.Space[x - 2][y] = Block.Floating | Block.LBlock;
+                                                    this.Space[x - 1][y] = Block.Floating | Block.LBlock;
+                                                    this.Space[x - 1][y + 2] = Block.Floating | Block.LBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 1] = Block.Empty;
+                                                    this.Space[x - 2][y + 1] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a
+                                        //   a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x][y + 1] == Block.Empty
+                                                && this.Space[x][y + 2] == Block.Empty
+                                                && this.Space[x + 2][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x][y + 1] = Block.Floating | Block.LBlock;
+                                            this.Space[x][y + 2] = Block.Floating | Block.LBlock;
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.LBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 1][y] = Block.Empty;
+                                            this.Space[x + 1][y + 2] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ReverseL) != Block.Empty)
+                                {
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
+                                {
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
+                                {
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.IBlock) != Block.Empty)
+                                {
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.TBlock) != Block.Empty)
+                                {
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+            }
         }
 
         /// <summary>
@@ -333,17 +563,7 @@ namespace ModernGames.MGControls.MGames
         OUT:
 
             // 테스터
-            test.Text = "";
-            for (int y = 0; y < Y_LENGTH; y++)
-            {
-                bool line_clear = true;
-                for (int x = 0; x < X_LENGTH; x++)
-                {
-                    test.Text += (this.Space[x][y] == Block.Empty ? "□" : "■");
-                    line_clear &= (this.Space[x][y] & Block.Building) != Block.Empty;
-                }
-                test.Text += ("\r\n");
-            }
+            GraphicDesign();
         }
 
         protected override void Start()
@@ -353,6 +573,18 @@ namespace ModernGames.MGControls.MGames
             CreateBlock(now ^ Block.Floating);
         }
 
-        private RichTextBox test;
+        protected override void SystemKeyDown(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.Left: LeftMove(); break;
+                case Keys.Right: RightMove(); break;
+                case Keys.Down: Replace(); break;
+                case Keys.A: Spin(true); break;
+                case Keys.S: Spin(false); break;
+            }
+            GraphicDesign();
+        }
+
     }
 }
