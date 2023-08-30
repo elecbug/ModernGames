@@ -34,7 +34,7 @@ namespace ModernGames.MGControls.MGames
         /// <summary>
         /// 블록 사이즈
         /// </summary>
-        private const int SIZE = 20;
+        private const int SIZE = 30;
         /// <summary>
         /// 블록이 처음 소환되는 위치 중 왼쪽 위
         /// </summary>
@@ -67,6 +67,8 @@ namespace ModernGames.MGControls.MGames
         /// <param name="level"> 게임의 난이도(0~99) </param>
         public Tetris(int level) : base("Tetris", "The Modern Tetris", (100 - level) * 5)
         {
+            this.Size = new Size(750, 750);
+            this.BackColor = Color.DarkSlateGray;
             this.ScoreLabel = new Label()
             {
                 Parent = this,
@@ -402,7 +404,7 @@ namespace ModernGames.MGControls.MGames
                     }
                     else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.DarkOliveGreen), SIZE / 2),
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.YellowGreen), SIZE / 2),
                             new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
@@ -422,7 +424,7 @@ namespace ModernGames.MGControls.MGames
                     }
                     else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.RosyBrown), SIZE / 2),
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.Brown), SIZE / 2),
                             new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else
@@ -898,6 +900,8 @@ namespace ModernGames.MGControls.MGames
                 case Keys.A: Spin(true); break;
                 case Keys.S: Spin(false); break;
             }
+
+            new Thread(GraphicDesign).Start();
         }
     }
 }

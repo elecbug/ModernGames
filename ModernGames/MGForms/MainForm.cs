@@ -18,9 +18,7 @@ namespace ModernGames
             {
                 Parent = this,
                 Visible = true,
-                Size = new Size(500, 500),
                 Location = new Point(0, 50),
-                BackColor = Color.Black,
             };
             tetris.Open();
         }
