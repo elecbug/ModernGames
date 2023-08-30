@@ -74,6 +74,7 @@ namespace ModernGames.MGControls.MGames
                 Location = new Point(X_LENGTH * SIZE + SIZE, 0),
                 ForeColor = Color.White,
                 AutoSize = true,
+                Font = new Font("Consolas", 12),
             };
             this.Disposed += TetrisDisposed;
             this.Space = new List<List<Block>>();
@@ -189,7 +190,7 @@ namespace ModernGames.MGControls.MGames
             }
         }
         /// <summary>
-        /// 특정 좌표 주위 4칸 내의 모든 Floating 블록을 Build시킴
+        /// 특정 좌표 주위 4칸 내의 모든 Floating 블록을 Build하고 라인이 완성되었는 지, 아웃 판정 등을 확인
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -220,6 +221,7 @@ namespace ModernGames.MGControls.MGames
             }
 
             // 라인완성
+            int temp = this.Combo;
             bool now_claer = false;
             for (int yy = 0; yy < Y_LENGTH; yy++)
             {
@@ -230,8 +232,15 @@ namespace ModernGames.MGControls.MGames
                 }
                 if (line_clear)
                 {
+                    // 라인 지우고 점수 업
                     LineRemove(yy);
                     now_claer = true;
+                    temp++;
+                    this.Score += UP_SCORE * temp;
+                }
+                if (now_claer)
+                {
+                    this.Combo = temp;
                 }
                 else if (!now_claer)
                 {
@@ -244,7 +253,8 @@ namespace ModernGames.MGControls.MGames
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DownBlock(int x, int y)
+        /// <returns> 블록이 빌딩 되었는 지 여부 </returns>
+        private bool DownBlock(int x, int y)
         {
             // 블록이 빌딩될 건지 확인
             for (int xx = x - 3; xx < x + 4; xx++)
@@ -259,7 +269,7 @@ namespace ModernGames.MGControls.MGames
                             if (yy + 1 == Y_LENGTH || (this.Space[xx][yy + 1] & Block.Building) != Block.Empty)
                             {
                                 ChangeBuilding(xx, yy);
-                                return;
+                                return true;
                             }
                         }
                     }
@@ -281,6 +291,8 @@ namespace ModernGames.MGControls.MGames
                     }
                 }
             }
+
+            return false;
         }
         /// <summary>
         /// 해당 높이의 라인을 모두 삭제
@@ -293,8 +305,6 @@ namespace ModernGames.MGControls.MGames
                 this.Space[i].RemoveAt(y);
                 this.Space[i].Insert(0, Block.Empty);
             }
-            this.Combo++;
-            this.Score += UP_SCORE * this.Combo;
         }
         /// <summary>
         /// 좌로 밀착
@@ -374,7 +384,7 @@ namespace ModernGames.MGControls.MGames
         private void GraphicDesign()
         {
             Graphics graphics = this.CreateGraphics();
-            this.ScoreLabel.Text = "Score: " + this.Score + " next, +" + (this.Combo * 10) + "!";
+            this.Invoke(delegate () { this.ScoreLabel.Text = "Score: " + this.Score + " next + " + (this.Combo * 10) + "!"; });
 
             for (int y = 0; y < Y_LENGTH; y++)
             {
@@ -858,13 +868,14 @@ namespace ModernGames.MGControls.MGames
                         }
                     }
                 }
+
                 // 여기까지 왔으면 공중 블록이 없음 => 생성
                 Block now = PopBlock();
                 CreateBlock(now ^ Block.Floating);
             OUT:
 
-                // 테스터
-                GraphicDesign();
+                // 그래픽 디자이너
+                new Thread(GraphicDesign).Start();
             }
         }
 
@@ -883,6 +894,7 @@ namespace ModernGames.MGControls.MGames
                 case Keys.Left: LeftMove(); break;
                 case Keys.Right: RightMove(); break;
                 case Keys.Down: Replace(); break;
+                case Keys.Up: Replace(); break;
                 case Keys.A: Spin(true); break;
                 case Keys.S: Spin(false); break;
             }
