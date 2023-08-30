@@ -9,16 +9,14 @@ namespace ModernGames
         {
             InitializeComponent();
 
-            ExitButton exitButton = new ExitButton()
-            { 
-                Parent = this,
-                Size = new Size(50, 50),
-            };
+            this.ClientSize = new Size(900, 900);
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
             Tetris tetris = new Tetris(1) 
             {
                 Parent = this,
                 Visible = true,
-                Location = new Point(0, 50),
+                Location = new Point(50, 50),
             };
             tetris.Open();
         }

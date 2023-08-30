@@ -424,7 +424,7 @@ namespace ModernGames.MGControls.MGames
                     }
                     else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.Brown), SIZE / 2),
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.Black), SIZE / 2),
                             new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else
@@ -591,7 +591,7 @@ namespace ModernGames.MGControls.MGames
                                             // a
                                             // a a a
 
-                                            if (x >= 0 && x < X_LENGTH + 1 && y >= 0 && y < Y_LENGTH
+                                            if (x >= 0 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH
                                                 && this.Space[x + 1][y] == Block.Empty
                                                 && this.Space[x][y + 2] == Block.Empty
                                                 && this.Space[x + 1][y + 2] == Block.Empty)
@@ -828,7 +828,389 @@ namespace ModernGames.MGControls.MGames
             }
             else
             {
-                // 우로굴러?
+                try
+                {
+                    for (int y = 0; y < Y_LENGTH; y++)
+                    {
+                        for (int x = 0; x < X_LENGTH; x++)
+                        {
+                            if ((this.Space[x][y] & Block.Floating) != Block.Empty)
+                            {
+                                if ((this.Space[x][y] & Block.LBlock) != Block.Empty)
+                                {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.LBlock) != Block.Empty)
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.LBlock) != Block.Empty)
+                                        {
+                                            // a
+                                            // a    
+                                            // a a
+
+                                            if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 1
+                                                && this.Space[x + 1][y + 1] == Block.Empty
+                                                && this.Space[x - 1][y + 1] == Block.Empty
+                                                && this.Space[x - 1][y + 2] == Block.Empty)
+                                            {
+                                                this.Space[x + 1][y + 1] = Block.Floating | Block.LBlock;
+                                                this.Space[x - 1][y + 1] = Block.Floating | Block.LBlock;
+                                                this.Space[x - 1][y + 2] = Block.Floating | Block.LBlock;
+
+                                                this.Space[x][y] = Block.Empty;
+                                                this.Space[x][y + 2] = Block.Empty;
+                                                this.Space[x + 1][y + 2] = Block.Empty;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.LBlock) != Block.Empty)
+                                            {
+                                                // a a a
+                                                // a
+
+                                                if (x >= 0 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                                    && this.Space[x + 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y - 1] == Block.Empty
+                                                    && this.Space[x][y - 1] == Block.Empty)
+                                                {
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.LBlock;
+                                                    this.Space[x + 1][y - 1] = Block.Floating | Block.LBlock;
+                                                    this.Space[x][y - 1] = Block.Floating | Block.LBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 1] = Block.Empty;
+                                                    this.Space[x + 2][y] = Block.Empty;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //     a
+                                                // a a a
+
+                                                if (x >= 1 && x < X_LENGTH && y >= 0 && y < Y_LENGTH
+                                                    && this.Space[x - 1][y + 2] == Block.Empty
+                                                    && this.Space[x][y + 2] == Block.Empty
+                                                    && this.Space[x - 1][y] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y] = Block.Floating | Block.LBlock;
+                                                    this.Space[x][y + 2] = Block.Floating | Block.LBlock;
+                                                    this.Space[x - 1][y + 2] = Block.Floating | Block.LBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 1] = Block.Empty;
+                                                    this.Space[x - 2][y + 1] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a
+                                        //   a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 1
+                                            && this.Space[x + 2][y] == Block.Empty
+                                            && this.Space[x + 2][y + 1] == Block.Empty
+                                            && this.Space[x][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x][y + 1] = Block.Floating | Block.LBlock;
+                                            this.Space[x + 2][y] = Block.Floating | Block.LBlock;
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.LBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 1][y] = Block.Empty;
+                                            this.Space[x + 1][y + 2] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ReverseL) != Block.Empty)
+                                {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.ReverseL) != Block.Empty)
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.ReverseL) != Block.Empty)
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.ReverseL) != Block.Empty)
+                                            {
+                                                // a a
+                                                // a
+                                                // a
+
+                                                if (x >= 1 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 1
+                                                    && this.Space[x + 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 2] == Block.Empty
+                                                    && this.Space[x - 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x + 1][y + 2] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.ReverseL;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x + 1][y] = Block.Empty;
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //   a
+                                                //   a
+                                                // a a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                                    && this.Space[x - 1][y] == Block.Empty
+                                                    && this.Space[x - 1][y + 1] == Block.Empty
+                                                    && this.Space[x + 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.ReverseL;
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                    this.Space[x - 1][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // a
+                                            // a a a
+
+                                            if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x + 1][y] == Block.Empty
+                                                && this.Space[x + 2][y] == Block.Empty
+                                                && this.Space[x + 1][y + 2] == Block.Empty)
+                                            {
+                                                this.Space[x + 1][y] = Block.Floating | Block.ReverseL;
+                                                this.Space[x + 2][y] = Block.Floating | Block.ReverseL;
+                                                this.Space[x + 1][y + 2] = Block.Floating | Block.ReverseL;
+
+                                                this.Space[x][y] = Block.Empty;
+                                                this.Space[x][y + 1] = Block.Empty;
+                                                this.Space[x + 2][y + 1] = Block.Empty;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a a
+                                        //     a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 1 && y < Y_LENGTH - 1
+                                            && this.Space[x + 1][y - 1] == Block.Empty
+                                            && this.Space[x][y + 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.ReverseL;
+                                            this.Space[x][y + 1] = Block.Floating | Block.ReverseL;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.ReverseL;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 2][y] = Block.Empty;
+                                            this.Space[x + 2][y + 1] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ZBlock) != Block.Empty)
+                                {
+                                    if (y < Y_LENGTH - 1 && (this.Space[x][y + 1] & Block.ZBlock) != Block.Empty)
+                                    {
+                                        //   a
+                                        // a a
+                                        // a
+
+                                        if (x >= 2 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 1
+                                            && this.Space[x - 1][y] == Block.Empty
+                                            && this.Space[x - 2][y] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y] = Block.Floating | Block.ZBlock;
+                                            this.Space[x - 2][y] = Block.Floating | Block.ZBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x - 1][y + 2] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a a
+                                        //   a a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 2
+                                            && this.Space[x + 2][y] == Block.Empty
+                                            && this.Space[x + 1][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 2][y] = Block.Floating | Block.ZBlock;
+                                            this.Space[x + 1][y + 2] = Block.Floating | Block.ZBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 1][y] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.ReverseZ) != Block.Empty)
+                                {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.ReverseZ) != Block.Empty)
+                                    {
+                                        //   a a
+                                        // a a
+
+                                        if (x >= 1 && x < X_LENGTH && y >= 0 && y < Y_LENGTH - 2
+                                            && this.Space[x - 1][y] == Block.Empty
+                                            && this.Space[x - 1][y - 1] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y] = Block.Floating | Block.ReverseZ;
+                                            this.Space[x - 1][y - 1] = Block.Floating | Block.ReverseZ;
+
+                                            this.Space[x + 1][y] = Block.Empty;
+                                            this.Space[x - 1][y + 1] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a
+                                        // a a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH - 1
+                                            && this.Space[x + 2][y + 1] == Block.Empty
+                                            && this.Space[x][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.ReverseZ;
+                                            this.Space[x][y + 2] = Block.Floating | Block.ReverseZ;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x][y + 1] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.IBlock) != Block.Empty)
+                                {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.IBlock) != Block.Empty)
+                                    {
+                                        // a a a a
+
+                                        if (x >= 0 && x < X_LENGTH && y >= 1 && y < Y_LENGTH - 2
+                                            && this.Space[x + 1][y - 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty
+                                            && this.Space[x + 1][y + 2] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 2] = Block.Floating | Block.IBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x + 2][y] = Block.Empty;
+                                            this.Space[x + 3][y] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // a
+                                        // a 
+                                        // a
+                                        // a
+
+                                        if (x >= 1 && x < X_LENGTH - 2 && y >= 0 && y < Y_LENGTH
+                                            && this.Space[x - 1][y + 1] == Block.Empty
+                                            && this.Space[x + 1][y + 1] == Block.Empty
+                                            && this.Space[x + 2][y + 1] == Block.Empty)
+                                        {
+                                            this.Space[x - 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 1][y + 1] = Block.Floating | Block.IBlock;
+                                            this.Space[x + 2][y + 1] = Block.Floating | Block.IBlock;
+
+                                            this.Space[x][y] = Block.Empty;
+                                            this.Space[x][y + 2] = Block.Empty;
+                                            this.Space[x][y + 3] = Block.Empty;
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.TBlock) != Block.Empty)
+                                {
+                                    if (x < X_LENGTH - 1 && (this.Space[x + 1][y] & Block.TBlock) != Block.Empty)
+                                    {
+                                        // a a a
+                                        //   a
+
+                                        if (x >= 0 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                            && this.Space[x + 1][y - 1] == Block.Empty)
+                                        {
+                                            this.Space[x + 1][y - 1] = Block.Floating | Block.TBlock;
+
+                                            this.Space[x + 2][y] = Block.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (y < Y_LENGTH - 2 && (this.Space[x][y + 2] & Block.TBlock) != Block.Empty)
+                                        {
+                                            if (x < X_LENGTH - 1 && (this.Space[x + 1][y + 1] & Block.TBlock) != Block.Empty)
+                                            {
+                                                // a
+                                                // a a
+                                                // a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 1 && y < Y_LENGTH - 1
+                                                    && this.Space[x - 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x - 1][y + 1] = Block.Floating | Block.TBlock;
+
+                                                    this.Space[x][y] = Block.Empty;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //   a
+                                                // a a
+                                                //   a
+
+                                                if (x >= 1 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 1
+                                                    && this.Space[x + 1][y + 1] == Block.Empty)
+                                                {
+                                                    this.Space[x + 1][y + 1] = Block.Floating | Block.TBlock;
+
+                                                    this.Space[x][y + 2] = Block.Empty;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //   a
+                                            // a a a
+
+                                            if (x >= 0 && x < X_LENGTH - 1 && y >= 0 && y < Y_LENGTH - 2
+                                                && this.Space[x][y + 2] == Block.Empty)
+                                            {
+                                                this.Space[x][y + 2] = Block.Floating | Block.TBlock;
+
+                                                this.Space[x - 1][y + 1] = Block.Empty;
+                                            }
+                                        }
+                                    }
+
+                                    return;
+                                }
+                                else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    Debug.WriteLine(ex);
+                }
             }
         }
 
