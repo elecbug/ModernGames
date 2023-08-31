@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\Resources\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Properties\Image.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

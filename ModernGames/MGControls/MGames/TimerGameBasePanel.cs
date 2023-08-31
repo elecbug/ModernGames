@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Timer = System.Windows.Forms.Timer;
 
 namespace ModernGames.MGControls.MGames
 {
@@ -55,11 +54,18 @@ namespace ModernGames.MGControls.MGames
                 this.roof2 = true;
                 while (true)
                 {
+                    lock (this.locker1)
+                    {
+                        if (!this.roof1)
+                        {
+                            break;
+                        }
+                    }
                     lock (this.locker2)
                     {
                         if (!this.roof2)
                         {
-                            break;
+                            continue;
                         }
                     }
                     Replace(); 
@@ -97,8 +103,8 @@ namespace ModernGames.MGControls.MGames
         public void Open()
         {
             Start();
-            this.KeyChecker.Start();
 
+            this.KeyChecker.Start();
             this.Timer.Start();
         }
 

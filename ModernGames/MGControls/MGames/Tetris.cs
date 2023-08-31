@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModernGames.Properties;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -60,6 +61,10 @@ namespace ModernGames.MGControls.MGames
         /// 점수 레이블
         /// </summary>
         private Label ScoreLabel;
+        /// <summary>
+        /// 다음 블록이 표시되는 상자
+        /// </summary>
+        private PictureBox NextBlockViewer;
 
         /// <summary>
         /// 테트리스 게임 시작 생성자
@@ -73,10 +78,18 @@ namespace ModernGames.MGControls.MGames
             {
                 Parent = this,
                 Visible = true,
-                Location = new Point(X_LENGTH * SIZE + SIZE, 0),
+                Location = new Point(X_LENGTH * SIZE + SIZE, SIZE),
                 ForeColor = Color.White,
                 AutoSize = true,
                 Font = new Font("Consolas", 12),
+            };
+            this.NextBlockViewer = new PictureBox()
+            {
+                Parent = this,
+                Visible = true,
+                Location = new Point(X_LENGTH * SIZE + SIZE, SIZE * 3),
+                Size = new Size(100, 100),
+                BackColor = Color.White,
             };
             this.Disposed += TetrisDisposed;
             this.Space = new List<List<Block>>();
@@ -93,43 +106,39 @@ namespace ModernGames.MGControls.MGames
         }
 
         /// <summary>
-        /// NextList의 원소가 없는 경우 하나씩 채움
+        /// NextList의 원소가 하나인 경우 뒤에서 하나씩 채움
         /// </summary>
         private void NextListSetting()
         {
-            if (this.NextList.Count != 0)
+            if (this.NextList.Count > 1)
             {
                 Debug.WriteLine("다음 블록 리스트가 비지 않았는데 리스트를 채우려 했습니다.");
                 return;
             }
-
-            List<Block> list = new List<Block>(new Block[BLOCK_COUNT]);
             
             for (int i = 0; i < BLOCK_COUNT; i++)
             {
-                list[i] = Block.Floating | (Block)(4 * Math.Pow(2, i));
+                this.NextList.Add(Block.Floating | (Block)(4 * Math.Pow(2, i)));
             }
 
-            int n = list.Count;
+            int n = this.NextList.Count;
 
-            while (n > 1)
+            while (n > 2)
             {
                 n--;
-                int k = new Random(DateTime.Now.Millisecond).Next(n + 1);
-                Block value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                int k = new Random(DateTime.Now.Millisecond).Next(1, n + 1);
+                Block value = this.NextList[k];
+                this.NextList[k] = this.NextList[n];
+                this.NextList[n] = value;
             }
-
-            this.NextList = list;
         }
         /// <summary>
-        /// NextList에서 요소 하나를 반환하고, 만약 리스트가 비었다면 새로 채움
+        /// NextList에서 요소 하나를 반환하고, 만약 리스트가 하나 남았다면 새로 채움
         /// </summary>
         /// <returns></returns>
         private Block PopBlock()
         {
-            if (this.NextList.Count == 0)
+            if (this.NextList.Count <= 1)
             {
                 NextListSetting();
             }
@@ -140,7 +149,7 @@ namespace ModernGames.MGControls.MGames
             return now;
         }
         /// <summary>
-        /// 블록 생성 메서드
+        /// 실제 좌표상 블록 생성 메서드
         /// </summary>
         /// <param name="block"> 생성할 새 블록 </param>
         private void CreateBlock(Block block)
@@ -430,7 +439,7 @@ namespace ModernGames.MGControls.MGames
                     }
                     else if ((this.Space[x][y] & Block.BoxBlock) != Block.Empty)
                     {
-                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.Black), SIZE / 2),
+                        graphics.DrawRectangle(new Pen(new SolidBrush(Color.Purple), SIZE / 2),
                             new Rectangle(new Point(x * SIZE + SIZE / 2, y * SIZE - SIZE / 2), new Size(SIZE / 2, SIZE / 2)));
                     }
                     else
@@ -1219,6 +1228,22 @@ namespace ModernGames.MGControls.MGames
                 }
             }
         }
+        /// <summary>
+        /// 다음 블록이 뭔지 보여주는 메서드
+        /// </summary>
+        private void NextBlockView()
+        {
+            switch (this.NextList[0] ^ Block.Floating)
+            {
+                case Block.LBlock: this.NextBlockViewer.BackgroundImage = Properties.Image.L; break;
+                case Block.ReverseL: this.NextBlockViewer.BackgroundImage = Properties.Image.Lr; break;
+                case Block.ZBlock: this.NextBlockViewer.BackgroundImage = Properties.Image.Z; break;
+                case Block.ReverseZ: this.NextBlockViewer.BackgroundImage = Properties.Image.Zr; break;
+                case Block.BoxBlock: this.NextBlockViewer.BackgroundImage = Properties.Image.Box; break;
+                case Block.TBlock: this.NextBlockViewer.BackgroundImage = Properties.Image.T; break;
+                case Block.IBlock: this.NextBlockViewer.BackgroundImage = Properties.Image.I; break;
+            }
+        }
 
         /// <summary>
         /// 블록의 종류, 공간은 0 ~ 2 | 4 ~ 256으로 구성됨
@@ -1262,6 +1287,7 @@ namespace ModernGames.MGControls.MGames
                 // 여기까지 왔으면 공중 블록이 없음 => 생성
                 base.TimerInterval--;
                 Block now = PopBlock();
+                NextBlockView();
                 CreateBlock(now ^ Block.Floating);
             OUT:
 
@@ -1299,6 +1325,7 @@ namespace ModernGames.MGControls.MGames
                 // 여기까지 왔으면 공중 블록이 없음 => 생성
                 base.TimerInterval--;
                 Block now = PopBlock();
+                NextBlockView();
                 CreateBlock(now ^ Block.Floating);
             OUT:
 
@@ -1307,11 +1334,13 @@ namespace ModernGames.MGControls.MGames
             }
         }
 
+
         protected override void Start()
         {
             // 최초 블록 생성
             Block now = PopBlock();
             CreateBlock(now ^ Block.Floating);
+            NextBlockView();
         }
 
         private bool waiter = false;

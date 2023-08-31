@@ -21,7 +21,6 @@ namespace ModernGames
             Button button = new Button() 
             {
                 Parent = this,
-
             };
             button.Click += (s, e) => { tetris.Open(); };             
         }
