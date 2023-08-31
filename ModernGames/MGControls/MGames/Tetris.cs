@@ -1262,6 +1262,42 @@ namespace ModernGames.MGControls.MGames
                 new Thread(GraphicDesign).Start();
             }
         }
+        /// <summary>
+        /// 빠르게 다운
+        /// </summary>
+        private void SpeedDown()
+        {
+            lock (this.locker)
+            {
+            TOP:
+                for (int x = 0; x < X_LENGTH; x++)
+                {
+                    for (int y = Y_LENGTH - 1; y >= 0; y--)
+                    {
+                        if ((this.Space[x][y] & Block.Floating) != Block.Empty)
+                        {
+                            // 블록이 하나라도 공중에 있다면 전체 다운하고 탈출
+                            if (!DownBlock(x, y))
+                            {
+                                goto TOP;
+                            }
+                            else
+                            {
+                                goto OUT;
+                            }
+                        }
+                    }
+                }
+
+                // 여기까지 왔으면 공중 블록이 없음 => 생성
+                Block now = PopBlock();
+                CreateBlock(now ^ Block.Floating);
+            OUT:
+
+                // 그래픽 디자이너
+                new Thread(GraphicDesign).Start();
+            }
+        }
 
         protected override void Start()
         {
@@ -1278,12 +1314,13 @@ namespace ModernGames.MGControls.MGames
                 case Keys.Left: LeftMove(); break;
                 case Keys.Right: RightMove(); break;
                 case Keys.Down: Replace(); break;
-                case Keys.Up: Replace(); break;
+                case Keys.Up: SpeedDown(); break;
                 case Keys.A: Spin(true); break;
                 case Keys.S: Spin(false); break;
             }
 
             new Thread(GraphicDesign).Start();
         }
+
     }
 }
