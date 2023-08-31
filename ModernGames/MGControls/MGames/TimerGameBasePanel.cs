@@ -20,17 +20,21 @@ namespace ModernGames.MGControls.MGames
         /// 키 인풋을 체크하는 스레드
         /// </summary>
         protected Thread KeyChecker { get; private set; }
-        private object locker;
-        private bool roof;
+        private object locker1, locker2;
+        private bool roof1, roof2;
 
         /// <summary>
-        /// 게임 진행 타이머
+        /// 게임 진행 타이머 스레드
         /// </summary>
-        public Timer Timer { get; private set; }
+        public Thread Timer { get; private set; }
         /// <summary>
         /// 키 인식 간격
         /// </summary>
         protected int KeyInterval { get; set; }
+        /// <summary>
+        /// 메인 스레드의 간격
+        /// </summary>
+        public int TimerInterval { get; protected set; }
 
         /// <summary>
         /// 실시간 게임 생성자
@@ -43,20 +47,34 @@ namespace ModernGames.MGControls.MGames
             this.KeyInterval = 200;
             this.Name = name;
             this.Description = description;
-            this.Timer = new Timer() 
+            this.locker1 = new object();
+            this.locker2 = new object();
+            this.TimerInterval = interval;
+            this.Timer = new Thread(()=> 
             {
-                Interval = interval,
-            };
-            this.locker = new object();
+                this.roof2 = true;
+                while (true)
+                {
+                    lock (this.locker2)
+                    {
+                        if (!this.roof2)
+                        {
+                            break;
+                        }
+                    }
+                    Replace(); 
+                    Task.Delay(this.TimerInterval).Wait();
+                }
+            });
             this.KeyChecker = new Thread(() =>
             {
-                this.roof = true;
+                this.roof1 = true;
 
                 while (true)
                 {
-                    lock (this.locker)
+                    lock (this.locker1)
                     {
-                        if (!this.roof) 
+                        if (!this.roof1) 
                         {
                             break;
                         }
@@ -81,10 +99,6 @@ namespace ModernGames.MGControls.MGames
             Start();
             this.KeyChecker.Start();
 
-            this.Timer.Tick += (s, e) =>
-            {
-                Replace();
-            };
             this.Timer.Start();
         }
 
@@ -93,11 +107,14 @@ namespace ModernGames.MGControls.MGames
         /// </summary>
         public void Close()
         {
-            this.Timer.Stop();
-
-            lock (this.locker)
+            lock (this.locker2)
             {
-                this.roof = false;
+                this.roof2 = false;
+            }
+
+            lock (this.locker1)
+            {
+                this.roof1 = false;
             }
             End();
         }
@@ -109,9 +126,19 @@ namespace ModernGames.MGControls.MGames
         public void Wait(bool wait)
         {
             if (wait)
-                this.Timer.Enabled = false;
+            {
+                lock (this.locker2)
+                {
+                    this.roof2 = false;
+                }
+            }
             else
-                this.Timer.Enabled = true;
+            {
+                lock (this.locker2)
+                {
+                    this.roof2 = true;
+                }
+            }
         }
 
         /// <summary>

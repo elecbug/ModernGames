@@ -18,7 +18,12 @@ namespace ModernGames
                 Visible = true,
                 Location = new Point(50, 50),
             };
-            tetris.Open();
+            Button button = new Button() 
+            {
+                Parent = this,
+
+            };
+            button.Click += (s, e) => { tetris.Open(); };             
         }
     }
 }

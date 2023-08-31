@@ -386,8 +386,14 @@ namespace ModernGames.MGControls.MGames
         private void GraphicDesign()
         {
             Graphics graphics = this.CreateGraphics();
-            this.Invoke(delegate () { this.ScoreLabel.Text = "Score: " + this.Score + " next + " + (this.Combo * 10) + "!"; });
-
+            try
+            {
+                this.Invoke(delegate () { this.ScoreLabel.Text = "Score: " + this.Score + " next + " + (this.Combo * 10) + "!"; });
+            }
+            catch (Exception ex)
+            {
+                Debug.Write(ex);
+            }
             for (int y = 0; y < Y_LENGTH; y++)
             {
                 for (int x = 0; x < X_LENGTH; x++)
@@ -1254,6 +1260,7 @@ namespace ModernGames.MGControls.MGames
                 }
 
                 // 여기까지 왔으면 공중 블록이 없음 => 생성
+                base.TimerInterval--;
                 Block now = PopBlock();
                 CreateBlock(now ^ Block.Floating);
             OUT:
@@ -1290,6 +1297,7 @@ namespace ModernGames.MGControls.MGames
                 }
 
                 // 여기까지 왔으면 공중 블록이 없음 => 생성
+                base.TimerInterval--;
                 Block now = PopBlock();
                 CreateBlock(now ^ Block.Floating);
             OUT:
