@@ -11,7 +11,7 @@ namespace ModernGames.MGControls.MGames
     /// <summary>
     /// 모든 실시간 게임의 베이스가 되는 추상 게임 패널
     /// </summary>
-    public abstract class TimerBaseGamePanel : Panel
+    public abstract class TimerGameBasePanel : Panel
     {
         public new string Name { get; protected set; }
         public string Description { get; protected set; }
@@ -38,7 +38,7 @@ namespace ModernGames.MGControls.MGames
         /// <param name="name"> 표시되는 게임 이름 </param>
         /// <param name="description"> 게임 설명 문구 </param>
         /// <param name="interval"> 프레임이자 게임의 진행 스피드 </param>
-        public TimerBaseGamePanel(string name, string description, int interval)
+        public TimerGameBasePanel(string name, string description, int interval)
         {
             this.KeyInterval = 200;
             this.Name = name;
@@ -109,9 +109,9 @@ namespace ModernGames.MGControls.MGames
         public void Wait(bool wait)
         {
             if (wait)
-                this.Timer.Stop();
+                this.Timer.Enabled = false;
             else
-                this.Timer.Start();
+                this.Timer.Enabled = true;
         }
 
         /// <summary>

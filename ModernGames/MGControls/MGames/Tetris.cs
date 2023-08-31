@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ModernGames.MGControls.MGames
 {
-    public class Tetris : TimerBaseGamePanel
+    public class Tetris : TimerGameBasePanel
     {
         /// <summary>
         /// 게임판 가로 길이
@@ -1306,6 +1306,7 @@ namespace ModernGames.MGControls.MGames
             CreateBlock(now ^ Block.Floating);
         }
 
+        private bool waiter = false;
         private object locker = new object();
         protected override void SystemKeyDown(Keys key)
         {
@@ -1317,6 +1318,7 @@ namespace ModernGames.MGControls.MGames
                 case Keys.Up: SpeedDown(); break;
                 case Keys.A: Spin(true); break;
                 case Keys.S: Spin(false); break;
+                case Keys.W: Wait(this.waiter = !this.waiter); break;
             }
 
             new Thread(GraphicDesign).Start();

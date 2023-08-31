@@ -16,7 +16,7 @@ namespace ModernGames.MyForm
             Application.Run(new MainForm());
         }
 
-        public static Keys[] KeySet = { Keys.Left, Keys.Right, Keys.Up, Keys.Down, Keys.A, Keys.S };
+        public static Keys[] KeySet = { Keys.Left, Keys.Right, Keys.Up, Keys.Down, Keys.A, Keys.S, Keys.W, };
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern short GetKeyState(int keyCode);
