@@ -11,7 +11,7 @@ namespace ModernGames.MGControls
         public ExitButton() : base() 
         {
             this.Click += ExitButtonClick;
-            this.Image = Properties.Image.Exit;
+            this.Image = Properties.Tetris.Exit;
             this.SizeMode = PictureBoxSizeMode.StretchImage;
         }
 

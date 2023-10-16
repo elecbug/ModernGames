@@ -9,18 +9,31 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Image.Designer.cs">
+    <Compile Update="Properties\Tetris.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Image.resx</DependentUpon>
+      <DependentUpon>Tetris.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Unit.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Unit.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Image.resx">
+    <EmbeddedResource Update="Properties\Tetris.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Image.Designer.cs</LastGenOutput>
+      <LastGenOutput>Tetris.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Unit.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Unit.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MGControls\MGames\Chess\Properties\" />
   </ItemGroup>
 
 </Project>

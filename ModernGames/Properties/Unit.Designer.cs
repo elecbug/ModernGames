@@ -22,14 +22,14 @@ namespace ModernGames.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Image {
+    public class Unit {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Image() {
+        internal Unit() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace ModernGames.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ModernGames.Properties.Image", typeof(Image).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ModernGames.Properties.Unit", typeof(Unit).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap Box {
+        public static System.Drawing.Bitmap Bishop {
             get {
-                object obj = ResourceManager.GetObject("Box", resourceCulture);
+                object obj = ResourceManager.GetObject("Bishop", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap Exit {
+        public static System.Drawing.Bitmap King {
             get {
-                object obj = ResourceManager.GetObject("Exit", resourceCulture);
+                object obj = ResourceManager.GetObject("King", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap I {
+        public static System.Drawing.Bitmap Knight {
             get {
-                object obj = ResourceManager.GetObject("I", resourceCulture);
+                object obj = ResourceManager.GetObject("Knight", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap L {
+        public static System.Drawing.Bitmap Pawn {
             get {
-                object obj = ResourceManager.GetObject("L", resourceCulture);
+                object obj = ResourceManager.GetObject("Pawn", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap Lr {
+        public static System.Drawing.Bitmap Queen {
             get {
-                object obj = ResourceManager.GetObject("Lr", resourceCulture);
+                object obj = ResourceManager.GetObject("Queen", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,29 +113,9 @@ namespace ModernGames.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap T {
+        public static System.Drawing.Bitmap Rook {
             get {
-                object obj = ResourceManager.GetObject("T", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap Z {
-            get {
-                object obj = ResourceManager.GetObject("Z", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap Zr {
-            get {
-                object obj = ResourceManager.GetObject("Zr", resourceCulture);
+                object obj = ResourceManager.GetObject("Rook", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
